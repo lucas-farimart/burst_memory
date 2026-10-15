@@ -1,0 +1,65 @@
+xrun(64): 24.09-s001: (c) Copyright 1995-2024 Cadence Design Systems, Inc.
+TOOL:	xrun(64)	24.09-s001: Started on Oct 15, 2026 at 17:39:32 -03
+xrun
+	-64bit
+	-sv
+	-access +rwc
+	-timescale 1ns/1ps
+	mem_ctrl.sv
+	mem_model.sv
+	tb_mem_ctrl.sv
+	-gui
+Recompiling... reason: file './tb_mem_ctrl.sv' is newer than expected.
+	expected: Thu Oct 15 17:38:50 2026
+	actual:   Thu Oct 15 17:39:26 2026
+file: tb_mem_ctrl.sv
+	module worklib.tb_memory_ctrl:sv
+		errors: 0, warnings: 0
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		tb_memory_ctrl
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.tb_memory_ctrl:sv <0x43c151cb>
+			streams:   7, words:  7657
+	Building instance specific data structures.
+	Loading native compiled code:     .................... Done
+	Design hierarchy summary:
+		                 Instances  Unique
+		Modules:                12       3
+		Registers:              86      23
+		Scalar wires:           63       -
+		Vectored wires:         42       -
+		Always blocks:          25       8
+		Initial blocks:         12       3
+		Parallel blocks:        10       1
+		Pseudo assignments:     74       -
+		Process Clocks:         11       1
+		Simulation timescale:  1ps
+	Writing initial simulation snapshot: worklib.tb_memory_ctrl:sv
+xmsim: *W,NOMTDGUI: Multi-Threaded Dumping is disabled for interactive debug mode.
+
+-------------------------------------
+Relinquished control to SimVision...
+xcelium> 
+xcelium> source /usr/local/cds/XCELIUM2409/tools/xcelium/files/xmsimrc
+xcelium> database -open waves -into waves.shm -default
+Created default SHM database waves
+xcelium> probe -create -shm tb_memory_ctrl.DUT.clk tb_memory_ctrl.DUT.rstn tb_memory_ctrl.DUT.enb tb_memory_ctrl.DUT.req tb_memory_ctrl.DUT.valid tb_memory_ctrl.DUT.addr tb_memory_ctrl.DUT.rdata_o
+Created probe 1
+xcelium> run
+
+
+===========================================================
+          ___             _     _____       _              
+         | _ )_  _ _ _ __| |_  |_   _|__ __| |_            
+         | _ \ || | '_(_-<  _|   | |/ -_|_-<  _|          
+         |___/\_,_|_| /__/\__|   |_|\___/__/\__|       
+===========================================================
+
+
+Simulation interrupted at 0 FS + 99960390
+xcelium> ^C
+xcelium> exit
+TOOL:	xrun(64)	24.09-s001: Exiting on Oct 15, 2026 at 17:41:36 -03  (total: 00:02:04)
