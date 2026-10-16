@@ -11,10 +11,10 @@ module tb_memory_ctrl;
     parameter int  ADDR_W      = 9;
     parameter int  DATA_W      = 32;
     parameter int  DEPTH       = 512;
-    parameter time SYS_CLOCK   = 1ns;
-    parameter time MEM_LATENCY = 10ns;
+    parameter time SYS_CLOCK   = 2ns;
+    parameter time MEM_LATENCY = 20ns;
     parameter time V_TIME      = 2ns;
-    parameter time TIME_OUT    = 1us;
+    parameter time TIME_OUT    = 200ns;
 
     logic              clk;
     logic              rstn;
@@ -41,13 +41,7 @@ module tb_memory_ctrl;
     //====================================================
     //  Clock/Reset Generation & Initial
     //====================================================
-    always #(SYS_CLOCK/2) clk = ~clk;
-
     initial begin
-
-        clk  = 0;
-        rstn = 0;
-        enb  = 0;
 
         $display("\n");
         $display("===========================================================");
@@ -58,14 +52,26 @@ module tb_memory_ctrl;
         $display("===========================================================");
         $display("\n");
                                         
-        repeat(2) @(negedge clk) rstn = 1;
-        repeat(5) @(negedge clk) enb  = 1;
-        repeat(1) @(negedge clk) enb  = 0;
+        repeat(2) @(negedge clk); rstn = 1;
+        repeat(5) @(negedge clk); enb  = 1;
+        repeat(1) @(negedge clk); enb  = 0;
 
     end
+
+    initial begin 
+        clk  = 0;
+        rstn = 0;
+        enb  = 0;
+    end
+
+    always #(SYS_CLOCK/2) clk = ~clk;
 
     initial begin
         #(TIME_OUT) $finish(1);
     end
+
+    // initial begin
+    //     $monitor("t=%0t clk=%b rstn=%b enb=%b rdata_o=%h", $time, clk, rstn, enb, rdata_o);
+    // end
 
 endmodule

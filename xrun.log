@@ -1,19 +1,20 @@
 xrun(64): 24.09-s001: (c) Copyright 1995-2024 Cadence Design Systems, Inc.
-TOOL:	xrun(64)	24.09-s001: Started on Oct 15, 2026 at 17:39:32 -03
+TOOL:	xrun(64)	24.09-s001: Started on Oct 16, 2026 at 11:21:38 -03
 xrun
 	-64bit
 	-sv
 	-access +rwc
-	-timescale 1ns/1ps
-	mem_ctrl.sv
-	mem_model.sv
-	tb_mem_ctrl.sv
+	-timescale 1ns/1ns
+	./sv/mem_ctrl.sv
+	./sv/mem_model.sv
+	./sv/tb_mem_ctrl.sv
 	-gui
-Recompiling... reason: file './tb_mem_ctrl.sv' is newer than expected.
-	expected: Thu Oct 15 17:38:50 2026
-	actual:   Thu Oct 15 17:39:26 2026
-file: tb_mem_ctrl.sv
-	module worklib.tb_memory_ctrl:sv
+	-s
+Recompiling... reason: file './sv/mem_ctrl.sv' is newer than expected.
+	expected: Fri Oct 16 11:16:19 2026
+	actual:   Fri Oct 16 11:19:57 2026
+file: ./sv/mem_ctrl.sv
+	module worklib.memory_ctrl:sv
 		errors: 0, warnings: 0
 		Caching library 'worklib' ....... Done
 	Elaborating the design hierarchy:
@@ -21,8 +22,8 @@ file: tb_mem_ctrl.sv
 		tb_memory_ctrl
 	Building instance overlay tables: .................... Done
 	Generating native compiled code:
-		worklib.tb_memory_ctrl:sv <0x43c151cb>
-			streams:   7, words:  7657
+		worklib.memory_ctrl:sv <0x3e06c80d>
+			streams:  20, words:  8204
 	Building instance specific data structures.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
@@ -30,25 +31,26 @@ file: tb_mem_ctrl.sv
 		Modules:                12       3
 		Registers:              86      23
 		Scalar wires:           63       -
-		Vectored wires:         42       -
-		Always blocks:          25       8
-		Initial blocks:         12       3
+		Vectored wires:         43       -
+		Always blocks:          26       8
+		Initial blocks:         14       5
 		Parallel blocks:        10       1
+		Cont. assignments:       1       1
 		Pseudo assignments:     74       -
-		Process Clocks:         11       1
+		Process Clocks:         13       1
 		Simulation timescale:  1ps
 	Writing initial simulation snapshot: worklib.tb_memory_ctrl:sv
 xmsim: *W,NOMTDGUI: Multi-Threaded Dumping is disabled for interactive debug mode.
-
--------------------------------------
-Relinquished control to SimVision...
 xcelium> 
 xcelium> source /usr/local/cds/XCELIUM2409/tools/xcelium/files/xmsimrc
-xcelium> database -open waves -into waves.shm -default
-Created default SHM database waves
-xcelium> probe -create -shm tb_memory_ctrl.DUT.clk tb_memory_ctrl.DUT.rstn tb_memory_ctrl.DUT.enb tb_memory_ctrl.DUT.req tb_memory_ctrl.DUT.valid tb_memory_ctrl.DUT.addr tb_memory_ctrl.DUT.rdata_o
-Created probe 1
+xcelium> 
+-------------------------------------
+Relinquished control to SimVision...
+# Restoring simulation environment...
+xcelium> input -quiet .reinvoke.sim
+xcelium> file delete .reinvoke.sim
 xcelium> run
+BANK = 10
 
 
 ===========================================================
@@ -59,7 +61,8 @@ xcelium> run
 ===========================================================
 
 
-Simulation interrupted at 0 FS + 99960390
+Simulation complete via $finish(1) at time 200 NS + 0
+./sv/tb_mem_ctrl.sv:70         #(TIME_OUT) $finish(1);
 xcelium> ^C
 xcelium> exit
-TOOL:	xrun(64)	24.09-s001: Exiting on Oct 15, 2026 at 17:41:36 -03  (total: 00:02:04)
+TOOL:	xrun(64)	24.09-s001: Exiting on Oct 16, 2026 at 11:39:08 -03  (total: 00:17:30)

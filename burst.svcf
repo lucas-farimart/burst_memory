@@ -1,4 +1,4 @@
-# SimVision Command Script (Thu Oct 15 17:41:30 -03 2026)
+# SimVision Command Script (Fri Oct 16 10:58:16 -03 2026)
 #
 # Version 24.09.s001
 #
@@ -81,22 +81,10 @@ mmap new  -reuse -name {Example Map} -radix %x -contents {{%b=11???? -bgcolor or
 {%x=* -label %x -linecolor gray -shape bus}}
 
 #
-# Design Browser windows
-#
-if {[catch {window new WatchList -name "Design Browser 1" -geometry 730x500+261+33}] != ""} {
-    window geometry "Design Browser 1" 730x500+261+33
-}
-window target "Design Browser 1" on
-browser using {Design Browser 1}
-browser set \
-    -signalsort name
-browser timecontrol set -lock 0
-
-#
 # Waveform windows
 #
-if {[catch {window new WaveWindow -name "Waveform 1" -geometry 1920x1015+0+0}] != ""} {
-    window geometry "Waveform 1" 1920x1015+0+0
+if {[catch {window new WaveWindow -name "Waveform 1" -geometry 1918x1014+0+0}] != ""} {
+    window geometry "Waveform 1" 1918x1014+0+0
 }
 window target "Waveform 1" on
 waveform using {Waveform 1}
@@ -104,9 +92,9 @@ waveform sidebar select designbrowser
 waveform set \
     -primarycursor TimeA \
     -signalnames name \
-    -signalwidth 175 \
+    -signalwidth 163 \
     -units ps \
-    -valuewidth 75
+    -valuewidth 81
 waveform baseline set -time 0
 
 set id [waveform add -signals [subst  {
@@ -133,7 +121,7 @@ set id [waveform add -signals [subst  {
 	} ]]
 set id [waveform add -cdivider divider]
 
-waveform xview limits 0 2000ps
+waveform xview limits 198000ps 200000ps
 
 #
 # Waveform Window Links
@@ -143,7 +131,7 @@ waveform xview limits 0 2000ps
 # Console windows
 #
 console set -windowname Console
-window geometry Console 730x250+261+564
+window geometry Console 959x1015+951+0
 
 #
 # Layout selection

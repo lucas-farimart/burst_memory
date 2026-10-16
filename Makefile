@@ -1,15 +1,19 @@
 #=====================
 # Variaveis
 #=====================
-FLAGS = -64bit -sv -access +rwc -timescale 1ns/1ps
-FILES = *.sv
+FLAGS = -64bit -sv -access +rwc -timescale 1ns/1ns
+FILES = ./sv/*.sv
 
 #=====================
 # COMANDOS
 #=====================
-.PHONY: all burst burst-gui debug clean
+.PHONY: all elaborate burst burst-gui debug clean
 
-all: burst
+all: clean burst
+
+elaborate:
+	clear
+	xrun -elaborate $(FLAGS) $(FILES)
 
 burst:
 	clear
