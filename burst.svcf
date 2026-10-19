@@ -1,4 +1,4 @@
-# SimVision Command Script (Fri Oct 16 10:58:16 -03 2026)
+# SimVision Command Script (Mon Oct 19 10:49:52 -03 2026)
 #
 # Version 24.09.s001
 #
@@ -66,9 +66,17 @@ preferences set toolbar-TimeSearch-WatchWindow {
 #
 array set dbNames ""
 set dbNames(realName1) [database require waves  -hints {
-	file ./waves.shm/waves.trn
-	file /home/aluno/works/memory-burst/waves.shm/waves.trn
+	file ./waves.shm/waves-1.trn
+	file /home/aluno/works/memory-burst/waves.shm/waves-1.trn
 }]
+
+#
+# Markers
+#
+set time 37000ps
+if {[catch {marker new -name  MEM_0 -time $time}] != ""} {
+    marker set -using MEM_0 -time $time -locked 0 
+}
 
 #
 # Mnemonic Maps
@@ -100,28 +108,57 @@ waveform baseline set -time 0
 set id [waveform add -signals [subst  {
 	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.clk}]}
 	} ]]
+waveform format $id -color #ffffff
 set id [waveform add -signals [subst  {
 	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.rstn}]}
 	} ]]
+waveform format $id -color #ffffff
 set id [waveform add -signals [subst  {
 	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.enb}]}
 	} ]]
+waveform format $id -color #ffffff
 set id [waveform add -cdivider divider]
 set id [waveform add -signals [subst  {
 	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.req[9:0]}]}
 	} ]]
+waveform hierarchy expand $id
+set id2 [lindex [waveform hierarchy content $id] 9]
+waveform format $id2 -color #00ff00
 set id [waveform add -signals [subst  {
 	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.valid[9:0]}]}
+	} ]]
+waveform hierarchy expand $id
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.valid_o}]}
 	} ]]
 set id [waveform add -signals [subst  {
 	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.addr[0:9]}]}
 	} ]]
+waveform hierarchy collapse $id
 set id [waveform add -signals [subst  {
 	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.rdata_o[31:0]}]}
 	} ]]
+waveform hierarchy collapse $id
+set id [waveform add -cdivider divider]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.CS_REQ[1:0]}]}
+	} ]]
+waveform format $id -color #00ffff -namecolor #00ffff
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.NS_REQ[1:0]}]}
+	} ]]
+waveform format $id -color #00ffff -namecolor #00ffff
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.CS_RSP[1:0]}]}
+	} ]]
+waveform format $id -color #0099ff -namecolor #0099ff
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {tb_memory_ctrl.DUT.NS_RSP[1:0]}]}
+	} ]]
+waveform format $id -color #0099ff -namecolor #0099ff
 set id [waveform add -cdivider divider]
 
-waveform xview limits 198000ps 200000ps
+waveform xview limits 0 199153ps
 
 #
 # Waveform Window Links
@@ -131,7 +168,7 @@ waveform xview limits 198000ps 200000ps
 # Console windows
 #
 console set -windowname Console
-window geometry Console 959x1015+951+0
+window geometry Console 959x1014+951+0
 
 #
 # Layout selection

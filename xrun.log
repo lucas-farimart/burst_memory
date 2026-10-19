@@ -1,5 +1,5 @@
 xrun(64): 24.09-s001: (c) Copyright 1995-2024 Cadence Design Systems, Inc.
-TOOL:	xrun(64)	24.09-s001: Started on Oct 16, 2026 at 11:21:38 -03
+TOOL:	xrun(64)	24.09-s001: Started on Oct 19, 2026 at 10:43:54 -03
 xrun
 	-64bit
 	-sv
@@ -11,33 +11,38 @@ xrun
 	-gui
 	-s
 Recompiling... reason: file './sv/mem_ctrl.sv' is newer than expected.
-	expected: Fri Oct 16 11:16:19 2026
-	actual:   Fri Oct 16 11:19:57 2026
+	expected: Mon Oct 19 10:27:17 2026
+	actual:   Mon Oct 19 10:43:52 2026
 file: ./sv/mem_ctrl.sv
 	module worklib.memory_ctrl:sv
 		errors: 0, warnings: 0
 		Caching library 'worklib' ....... Done
 	Elaborating the design hierarchy:
+    ) DUT (
+        |
+xmelab: *W,CUVWSP (./sv/tb_mem_ctrl.sv,34|8): 1 output port was not connected:
+xmelab: (./sv/mem_ctrl.sv,20): valid_o
+
 	Top level design units:
 		tb_memory_ctrl
 	Building instance overlay tables: .................... Done
 	Generating native compiled code:
-		worklib.memory_ctrl:sv <0x3e06c80d>
-			streams:  20, words:  8204
+		worklib.memory_ctrl:sv <0x05af44cc>
+			streams:  24, words: 10381
 	Building instance specific data structures.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                 Instances  Unique
 		Modules:                12       3
-		Registers:              86      23
+		Registers:              89      26
 		Scalar wires:           63       -
 		Vectored wires:         43       -
-		Always blocks:          26       8
-		Initial blocks:         14       5
+		Always blocks:          29      11
+		Initial blocks:         13       4
 		Parallel blocks:        10       1
 		Cont. assignments:       1       1
 		Pseudo assignments:     74       -
-		Process Clocks:         13       1
+		Process Clocks:         11       1
 		Simulation timescale:  1ps
 	Writing initial simulation snapshot: worklib.tb_memory_ctrl:sv
 xmsim: *W,NOMTDGUI: Multi-Threaded Dumping is disabled for interactive debug mode.
@@ -50,7 +55,23 @@ Relinquished control to SimVision...
 xcelium> input -quiet .reinvoke.sim
 xcelium> file delete .reinvoke.sim
 xcelium> run
-BANK = 10
+
+
+===========================================================
+          ___             _     _____       _              
+         | _ )_  _ _ _ __| |_  |_   _|__ __| |_            
+         | _ \ || | '_(_-<  _|   | |/ -_|_-<  _|          
+         |___/\_,_|_| /__/\__|   |_|\___/__/\__|       
+===========================================================
+
+
+Simulation complete via $finish(1) at time 200 NS + 0
+./sv/tb_mem_ctrl.sv:70         #(TIME_OUT) $finish(1);
+xcelium> probe -create -shm tb_memory_ctrl.DUT.valid_o
+Created probe 3
+xcelium> reset
+Loaded snapshot worklib.tb_memory_ctrl:sv
+xcelium> run
 
 
 ===========================================================
@@ -65,4 +86,6 @@ Simulation complete via $finish(1) at time 200 NS + 0
 ./sv/tb_mem_ctrl.sv:70         #(TIME_OUT) $finish(1);
 xcelium> ^C
 xcelium> exit
-TOOL:	xrun(64)	24.09-s001: Exiting on Oct 16, 2026 at 11:39:08 -03  (total: 00:17:30)
+...Regained control from SimVision
+-------------------------------------
+TOOL:	xrun(64)	24.09-s001: Exiting on Oct 19, 2026 at 10:50:08 -03  (total: 00:06:14)

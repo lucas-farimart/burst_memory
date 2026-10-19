@@ -17,28 +17,27 @@ module memory_ctrl #(
     input  logic              clk,
     input  logic              rstn,
     input  logic              enb,
+    output  logic             valid_o,
     output logic [DATA_W-1:0] rdata_o
 );
 
     localparam int BANK = int'( MEM_LATENCY / SYS_CLOCK );
-    initial $display("BANK = %0d", DUT.BANK);
+    // initial $display("BANK = %0d", DUT.BANK);
 
     //==========================================================
     //  Internos
     //==========================================================
-    typedef enum logic [1:0] {IDLE, SEND_REQ, GET_RESP} state_t;
+    typedef enum logic [1:0] {IDLE_REQ, SEND_REQ, WAIT_REQ} state_req;
+    typedef enum logic [1:0] {IDLE_RSP, GET_RSP,  WAIT_RSP} state_rsp;
 
-    state_t          CS, NS; 
-    logic            first_req;
-    logic            enb_r;
-    logic [BANK-1:0] req;
-    logic [BANK-1:0] we;
-    logic [BANK-1:0] valid;
-    logic [BANK-1:0] busy;
-
-    // logic [ADDR_W-1:0][0:BANK-1] addr;
-    // logic [DATA_W-1:0][0:BANK-1] wdata;
-    // logic [DATA_W-1:0][0:BANK-1] rdata;
+    state_req          CS_REQ, NS_REQ; 
+    state_rsp          CS_RSP, NS_RSP; 
+    logic              first_req;
+    logic              enb_r;
+    logic [BANK-1:0]   req;
+    logic [BANK-1:0]   we;
+    logic [BANK-1:0]   valid;
+    logic [BANK-1:0]   busy;
     logic [ADDR_W-1:0] addr  [BANK];
     logic [DATA_W-1:0] wdata [BANK];
     logic [DATA_W-1:0] rdata [BANK];
@@ -52,7 +51,7 @@ module memory_ctrl #(
             if (!rstn) begin
                 addr[l]  <= '0;
                 wdata[l] <= '0;
-            end else if (first_req) begin
+            end else begin
                 addr[l]  <= ADDR_W'(l);
                 wdata[l] <= '0;
             end
@@ -63,61 +62,63 @@ module memory_ctrl #(
     assign we = '0;  // só leitura por enquanto
 
     //==========================================================
-    //                   MAQUINA DE ESTADOS 
-    //              Atual e Proximo desacoplados
+    //  Maquina de estados para requisicao (req) 
     //==========================================================
     always_ff @(posedge clk or negedge rstn) begin
-        if (!rstn) CS <= IDLE;
-        else       CS <= NS;
+        if (!rstn) CS_REQ <= IDLE_REQ;
+        else       CS_REQ <= NS_REQ;
     end
 
     always_comb begin
-        case (CS)
-            IDLE:     NS = (enb) ? SEND_REQ : IDLE;
-            SEND_REQ: NS = (req[BANK-1])   ? GET_RESP : SEND_REQ;
-            GET_RESP: NS = (valid[BANK-1]) ? SEND_REQ : GET_RESP;
-            default:  NS = IDLE;
+        case (CS_REQ)
+            IDLE_REQ: NS_REQ = (enb) ? SEND_REQ : IDLE_REQ;
+            SEND_REQ: NS_REQ = (req[BANK-1]) ? WAIT_REQ : SEND_REQ;
+            WAIT_REQ: NS_REQ = (valid[0])    ? SEND_REQ : WAIT_REQ;
+            default:  NS_REQ = IDLE_REQ;
         endcase
     end
 
-    //===================================================
-    //  First Requisition
-    //===================================================
+    //==========================================================
+    //  Maquina de estados para resposta (rsp) 
+    //==========================================================
     always_ff @(posedge clk or negedge rstn) begin
-        if (!rstn) 
-            first_req <= 0;
-        else if (enb && CS==IDLE) 
-            first_req <= 1;
-        else
-            first_req <= 0;
-    end   
+        if (!rstn) CS_RSP <= IDLE_RSP;
+        else       CS_RSP <= NS_RSP;
+    end
+
+    always_comb begin
+        case (CS_RSP)
+            IDLE_RSP: NS_RSP = (enb) ? WAIT_RSP : IDLE_RSP;
+            WAIT_RSP: NS_RSP = (req[BANK-1])   ? GET_RSP : WAIT_RSP;
+            GET_RSP:  NS_RSP = (valid[BANK-1]) ? WAIT_RSP : GET_RSP;
+            default:  NS_RSP = IDLE_RSP;
+        endcase
+    end  
 
     //===================================================
     //  Requisition Shift Array
     //===================================================
-    // generate
-    // for (genvar i=1; i < BANK; i++) begin : req_gen
-    //     always_ff @( posedge clk or negedge rstn ) begin
-    //         if (!rstn)
-    //             req[i] <= '0;
-    //         else if (CS != IDLE) 
-    //             req[i] <= req[i-1];
-    //     end
-    // end
-    // endgenerate
-
-    // always_ff @( posedge clk or negedge rstn ) begin
-    //     if (!rstn)           
-    //         req[0] <= '0;
-    //     else if (CS != IDLE) 
-    //         req[0] <= first_req;
-    // end
-
-    // Sempre desloca, carrega start_pulse na entrada
     always_ff @(posedge clk or negedge rstn) begin
-        if (!rstn) req <= '0;
-        else       req <= {req[BANK-2:0], first_req};
+        if (!rstn) 
+            req[BANK-1:1] <= '0;
+        else begin 
+            if (NS_REQ==SEND_REQ) 
+                req[BANK-1:1] <= {req[BANK-2:1], req[0]};
+            else
+                req[BANK-1:1] <= '0;
+        end
     end
+
+    always_ff @(posedge clk or negedge rstn) begin
+        if (!rstn) 
+            req[0] <= 0;
+        else begin 
+            if ((enb && CS_REQ==IDLE_REQ) || (NS_REQ==SEND_REQ && CS_REQ==WAIT_REQ))
+                req[0] <= 1;
+            else
+                req[0] <= 0;
+        end
+    end   
 
     //===================================================
     //  Memory Bank
@@ -143,15 +144,6 @@ module memory_ctrl #(
     end
     endgenerate
 
-    // stub para isolar o problema
-    // generate
-    // for (genvar j=0; j<BANK; j++) begin : mem_gen
-    //     assign valid[j] = req[j];
-    //     assign busy[j]  = 1'b0;
-    //     assign rdata[j] = 32'hDEAD_0000 + j;
-    // end
-    // endgenerate
-
     //===================================================
     //  Valid Read Data 
     //===================================================
@@ -170,5 +162,7 @@ module memory_ctrl #(
             default:        rdata_o = '1;
         endcase
     end
+
+    always_comb valid_o = |valid; // qualquer valid vale
 
 endmodule
