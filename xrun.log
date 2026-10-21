@@ -1,78 +1,50 @@
-xrun(64): 24.09-s001: (c) Copyright 1995-2024 Cadence Design Systems, Inc.
-TOOL:	xrun(64)	24.09-s001: Started on Oct 21, 2026 at 11:08:57 -03
+xrun(64): 23.09-s003: (c) Copyright 1995-2023 Cadence Design Systems, Inc.
+TOOL:	xrun(64)	23.09-s003: Started on Oct 21, 2026 at 15:26:30 -03
 xrun
 	-64bit
 	-sv
 	-access +rwc
 	-timescale 1ns/1ns
-	./sv/mem_ctrl.sv
-	./sv/mem_model.sv
-	./sv/tb_mem_ctrl.sv
+	-f run_mult.f
+		./sv/booth_radix_4.sv
+		./sv/mem_ctrl.sv
+		./sv/mem_model.sv
+		./sv/tb_mem_mult.sv
 	-gui
 	-s
-Recompiling... reason: file './sv/tb_mem_ctrl.sv' is newer than expected.
-	expected: Wed Oct 21 11:07:51 2026
-	actual:   Wed Oct 21 11:08:52 2026
-file: ./sv/tb_mem_ctrl.sv
-	module worklib.tb_memory_ctrl:sv
+Recompiling... reason: file './sv/mem_model.sv' is newer than expected.
+	expected: Wed Oct 21 14:08:26 2026
+	actual:   Wed Oct 21 15:26:10 2026
+file: ./sv/mem_model.sv
+	module worklib.memory_model:sv
 		errors: 0, warnings: 0
 		Caching library 'worklib' ....... Done
 	Elaborating the design hierarchy:
 	Top level design units:
-		tb_memory_ctrl
-            10'b0000100000: rdata_o = rdata[5];
-                                          |
-xmelab: *W,BNDMEM (./sv/mem_ctrl.sv,169|42): Memory index out of declared bounds.
-            10'b0001000000: rdata_o = rdata[6];
-                                          |
-xmelab: *W,BNDMEM (./sv/mem_ctrl.sv,170|42): Memory index out of declared bounds.
-            10'b0010000000: rdata_o = rdata[7];
-                                          |
-xmelab: *W,BNDMEM (./sv/mem_ctrl.sv,171|42): Memory index out of declared bounds.
-            10'b0100000000: rdata_o = rdata[8];
-                                          |
-xmelab: *W,BNDMEM (./sv/mem_ctrl.sv,172|42): Memory index out of declared bounds.
-            10'b1000000000: rdata_o = rdata[9];
-                                          |
-xmelab: *W,BNDMEM (./sv/mem_ctrl.sv,173|42): Memory index out of declared bounds.
+		tb_memory_mult
 	Building instance overlay tables: .................... Done
 	Generating native compiled code:
-		worklib.tb_memory_ctrl:sv <0x3dc0c4ea>
-			streams:  10, words:  8696
-            10'b0000100000: rdata_o = rdata[5];
-                                          |
-xmelab: *W,BNDMEM (./sv/mem_ctrl.sv,169|42): Memory index out of declared bounds.
-            10'b0001000000: rdata_o = rdata[6];
-                                          |
-xmelab: *W,BNDMEM (./sv/mem_ctrl.sv,170|42): Memory index out of declared bounds.
-            10'b0010000000: rdata_o = rdata[7];
-                                          |
-xmelab: *W,BNDMEM (./sv/mem_ctrl.sv,171|42): Memory index out of declared bounds.
-            10'b0100000000: rdata_o = rdata[8];
-                                          |
-xmelab: *W,BNDMEM (./sv/mem_ctrl.sv,172|42): Memory index out of declared bounds.
-            10'b1000000000: rdata_o = rdata[9];
-                                          |
-xmelab: *W,BNDMEM (./sv/mem_ctrl.sv,173|42): Memory index out of declared bounds.
+		worklib.memory_model:sv <0x69c23aad>
+			streams:   4, words:  3019
 	Building instance specific data structures.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		                 Instances  Unique
-		Modules:                 7       3
-		Registers:              57      29
-		Scalar wires:           35       -
-		Vectored wires:         24       -
-		Always blocks:          23      15
-		Initial blocks:          9       5
-		Parallel blocks:         5       1
-		Cont. assignments:       1       1
-		Pseudo assignments:     41       -
-		Process Clocks:          8       1
+		Modules:                14       4
+		Registers:             135      56
+		Scalar wires:           76       -
+		Vectored wires:         52       -
+		Always blocks:          51      21
+		Initial blocks:         13       4
+		Parallel blocks:        10       1
+		Cont. assignments:       3       2
+		Pseudo assignments:     85       -
+		Process Clocks:         18       3
 		Simulation timescale:  1ps
-	Writing initial simulation snapshot: worklib.tb_memory_ctrl:sv
+	Writing initial simulation snapshot: worklib.tb_memory_mult:sv
 xmsim: *W,NOMTDGUI: Multi-Threaded Dumping is disabled for interactive debug mode.
 xcelium> 
-xcelium> source /usr/local/cds/XCELIUM2409/tools/xcelium/files/xmsimrc
+xcelium> source /Tools/cadence/XCELIUM2309/tools/xcelium/files/xmsimrc
 xcelium> 
 -------------------------------------
 Relinquished control to SimVision...
@@ -81,19 +53,17 @@ xcelium> input -quiet .reinvoke.sim
 xcelium> file delete .reinvoke.sim
 xcelium> run
 
-BANK = 5
-
 
 ===========================================================
-          ___             _     _____       _              
-         | _ )_  _ _ _ __| |_  |_   _|__ __| |_            
-         | _ \ || | '_(_-<  _|   | |/ -_|_-<  _|          
-         |___/\_,_|_| /__/\__|   |_|\___/__/\__|       
+      ___             _       _     __  __      _ _        
+     | _ )_  _ _ _ __| |_   _| |_  |  \/  |_  _| | |_     
+     | _ \ || | '_(_-<  _| |_   _| | |\/| | || | |  _|   
+     |___/\_,_|_| /__/\__|   |_|   |_|  |_|\_,_|_|\__| 
 ===========================================================
 
 
 Simulation complete via $finish(1) at time 1 US + 0
-./sv/tb_mem_ctrl.sv:85         #(TIME_OUT) $finish(1);
+./sv/tb_mem_mult.sv:118         #(TIME_OUT) $finish(1);
 xcelium> ^C
 xcelium> exit
-TOOL:	xrun(64)	24.09-s001: Exiting on Oct 21, 2026 at 12:04:13 -03  (total: 00:55:16)
+TOOL:	xrun(64)	23.09-s003: Exiting on Oct 21, 2026 at 15:39:05 -03  (total: 00:12:35)

@@ -1,6 +1,6 @@
-# SimVision Command Script (Wed Oct 21 12:04:10 -03 2026)
+# SimVision Command Script (Wed Oct 21 14:35:16 -03 2026)
 #
-# Version 24.09.s001
+# Version 23.09.s003
 #
 # You can restore this configuration with:
 #
@@ -19,18 +19,18 @@ preferences set toolbar-Standard-WatchWindow {
 preferences set toolbar-txe_waveform_navigate-WaveWindow {
   usual
   shown 1
-  position -row 2 -pos 3
+  position -row 3
 }
-preferences set waveform-print-variables all
-preferences set waveform-print-time range
 preferences set expand-attributes begin_time
 preferences set plugin-enable-svdatabrowser-new 1
-preferences set cursorctl-dont-show-sync-warning 1
 preferences set toolbar-Windows-WatchWindow {
   usual
   shown 0
 }
-preferences set waveform-print-paper {A4 (210mm x 297mm)}
+preferences set toolbar-Search-Console {
+  usual
+  position -anchor e
+}
 preferences set toolbar-txe_waveform_toggle-WaveWindow {
   usual
   position -pos 1
@@ -39,15 +39,15 @@ preferences set plugin-enable-groupscope 0
 preferences set toolbar-txe_waveform_view-WaveWindow {
   usual
   shown 1
-  position -row 2 -pos 4 -anchor e
+  position -row 3
 }
+preferences set standard-methodology-filtering 1
 preferences set plugin-enable-interleaveandcompare 0
 preferences set plugin-enable-waveformfrequencyplot 0
 preferences set toolbar-SimControl-WatchWindow {
   usual
   shown 0
 }
-preferences set waveform-print-colors {Color on white}
 preferences set toolbar-Windows-WaveWindow {
   usual
   position -pos 2
@@ -60,15 +60,47 @@ preferences set toolbar-TimeSearch-WatchWindow {
   usual
   shown 0
 }
+preferences set toolbar-txe_waveform_view-WaveWindow {
+  usual
+  shown 1
+  position -row 2 -pos 4 -anchor e
+}
+preferences set waveform-print-paper {A4 (210mm x 297mm)}
+preferences set cursorctl-dont-show-sync-warning 1
+preferences set waveform-print-variables all
+preferences set waveform-print-time range
+preferences set waveform-print-colors {Color on white}
+preferences set toolbar-txe_waveform_navigate-WaveWindow {
+  usual
+  shown 1
+  position -row 2 -pos 3
+}
 
 #
 # PPE data
 #
 array set dbNames ""
 set dbNames(realName1) [database require waves  -hints {
-	file ./waves.shm/waves.trn
-	file /home/aluno/works/memory-burst/waves.shm/waves.trn
+	file ./waves.shm/waves-1.trn
+	file /home/lucas.martins/workspace/burst_memory/waves.shm/waves-1.trn
 }]
+#
+# Groups
+#
+catch {group new -name MEM_0 -overlay 0}
+group using MEM_0
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.we}]} ] \
+    [subst  {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.req}]} ] \
+    [subst  {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.valid}]} ] \
+    [subst  {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.busy}]} ] \
+    [subst  {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.addr[8:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.rdata[31:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.wdata[31:0]}]} ]
 
 #
 # Markers
@@ -89,10 +121,22 @@ mmap new  -reuse -name {Example Map} -radix %x -contents {{%b=11???? -bgcolor or
 {%x=* -label %x -linecolor gray -shape bus}}
 
 #
+# Design Browser windows
+#
+if {[catch {window new WatchList -name "Design Browser 1" -geometry 730x500+261+33}] != ""} {
+    window geometry "Design Browser 1" 730x500+261+33
+}
+window target "Design Browser 1" on
+browser using {Design Browser 1}
+browser set \
+    -signalsort name
+browser timecontrol set -lock 0
+
+#
 # Waveform windows
 #
-if {[catch {window new WaveWindow -name "Waveform 1" -geometry 1918x1014+0+0}] != ""} {
-    window geometry "Waveform 1" 1918x1014+0+0
+if {[catch {window new WaveWindow -name "Waveform 1" -geometry 1920x1016+0+0}] != ""} {
+    window geometry "Waveform 1" 1920x1016+0+0
 }
 window target "Waveform 1" on
 waveform using {Waveform 1}
@@ -155,7 +199,41 @@ set id [waveform add -signals [subst  {
 waveform format $id -color #0099ff -namecolor #0099ff
 set id [waveform add -cdivider divider]
 
-waveform xview limits 0 127707ps
+set groupId0 [waveform add -groups MEM_0]
+set gpGlist0 [waveform hierarchy contents $groupId0]
+set gpID0 [lindex $gpGlist0 0]
+foreach {name attrs} [subst  {
+    {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.we}]} {-color #999999}
+    {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.req}]} {-color #999999}
+    {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.valid}]} {-color #999999}
+    {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.busy}]} {-color #999999}
+    {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.addr[8:0]}]} {-color #999999}
+    {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.rdata[31:0]}]} {-color #999999}
+    {$dbNames(realName1)::[format {tb_memory_ctrl.DUT.mem_gen[0].u_mem.wdata[31:0]}]} {-color #999999}
+}] childcmds {
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+} {
+    set expected [ join [waveform signals -format fullpath $gpID0] ]
+    if {[string equal $name $expected] || $name == "cdivider"} {
+        if {$attrs != ""} {
+            eval waveform format $gpID0 $attrs
+        }
+        if { $childcmds != ""} {
+            eval $childcmds
+        }
+    }
+    set gpGlist0 [lrange $gpGlist0 1 end]
+    set gpID0 [lindex $gpGlist0 0]
+}
+
+
+waveform xview limits 0 125000ps
 
 #
 # Waveform Window Links

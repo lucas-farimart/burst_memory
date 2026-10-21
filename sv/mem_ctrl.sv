@@ -23,7 +23,7 @@ module memory_ctrl #(
 );
 
     localparam int BANK = int'( MEM_LATENCY / SYS_CLOCK );
-    initial $display("\nBANK = %0d", DUT.BANK);
+    // initial $display("\nBANK = %0d", DUT.BANK);
 
     //==========================================================
     //  Internos
@@ -161,16 +161,16 @@ module memory_ctrl #(
     //===================================================
     always_comb begin
         case (valid)
-            10'b0000000001: rdata_o = rdata[0];
-            10'b0000000010: rdata_o = rdata[1];
-            10'b0000000100: rdata_o = rdata[2];
-            10'b0000001000: rdata_o = rdata[3];
-            10'b0000010000: rdata_o = rdata[4];
-            10'b0000100000: rdata_o = rdata[5];
-            10'b0001000000: rdata_o = rdata[6];
-            10'b0010000000: rdata_o = rdata[7];
-            10'b0100000000: rdata_o = rdata[8];
-            10'b1000000000: rdata_o = rdata[9];
+            5'b00001: rdata_o = rdata[0];
+            5'b00010: rdata_o = rdata[1];
+            5'b00100: rdata_o = rdata[2];
+            5'b01000: rdata_o = rdata[3];
+            5'b10000: rdata_o = rdata[4];
+            // 10'b0000100000: rdata_o = rdata[5];
+            // 10'b0001000000: rdata_o = rdata[6];
+            // 10'b0010000000: rdata_o = rdata[7];
+            // 10'b0100000000: rdata_o = rdata[8];
+            // 10'b1000000000: rdata_o = rdata[9];
             default:        rdata_o = '1;
         endcase
     end

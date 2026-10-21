@@ -1,5 +1,5 @@
 import secrets
 
-with open("./data/exp1.hex", "w") as arquivo:
+with open("./data/randata_8b.hex", "w") as arquivo:
     for _ in range(512):
-        arquivo.write(f"{secrets.randbits(32):08x}\n")
+        arquivo.write(f"{secrets.randbits(8):02x}\n")

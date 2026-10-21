@@ -34,7 +34,7 @@ module memory_model #(
         rdata = '0;
         valid = 1'b0;
         busy  = 1'b0;
-        $readmemh("./data/exp1.hex", mem);
+        $readmemh("./data/randata_8b.hex", mem);
     end
 
     //===================================================

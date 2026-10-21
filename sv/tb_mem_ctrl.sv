@@ -21,8 +21,8 @@ module tb_memory_ctrl;
     logic              rstn;
     logic              enb_i;
     logic [3:0]        size_i;
-    logic              valid_o;
     logic [DATA_W-1:0] rdata_o;
+    logic              valid_o;
 
     //====================================================
     //  DUT instance
