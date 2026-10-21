@@ -8,17 +8,20 @@
 
 module tb_memory_ctrl;
 
-    parameter int  ADDR_W      = 9;
-    parameter int  DATA_W      = 32;
-    parameter int  DEPTH       = 512;
+    parameter int  ADDR_W = 9;
+    parameter int  DATA_W = 32;
+    parameter int  DEPTH  = 512;
+
     parameter time SYS_CLOCK   = 2ns;
-    parameter time MEM_LATENCY = 20ns;
+    parameter time MEM_LATENCY = 10ns;
     parameter time V_TIME      = 2ns;
-    parameter time TIME_OUT    = 200ns;
+    parameter time TIME_OUT    = 1us;
 
     logic              clk;
     logic              rstn;
-    logic              enb;
+    logic              enb_i;
+    logic [3:0]        size_i;
+    logic              valid_o;
     logic [DATA_W-1:0] rdata_o;
 
     //====================================================
@@ -34,12 +37,14 @@ module tb_memory_ctrl;
     ) DUT (
         .clk         ( clk         ),
         .rstn        ( rstn        ),
-        .enb         ( enb         ),
+        .enb_i       ( enb_i       ),
+        .size_i      ( size_i      ),
+        .valid_o     ( valid_o     ),
         .rdata_o     ( rdata_o     )
     );
 
     //====================================================
-    //  Clock/Reset Generation & Initial
+    //  Effective Test
     //====================================================
     initial begin
 
@@ -52,16 +57,26 @@ module tb_memory_ctrl;
         $display("===========================================================");
         $display("\n");
                                         
-        repeat(2) @(negedge clk); rstn = 1;
-        repeat(5) @(negedge clk); enb  = 1;
-        repeat(1) @(negedge clk); enb  = 0;
+        repeat(2) @(negedge clk); 
+        rstn = 1;
+
+        repeat(5) @(negedge clk); 
+        enb_i  = 1;
+        size_i = 2; // <---- mudar aqui pra ver
+
+        repeat(1) @(negedge clk); 
+        enb_i = 0;
 
     end
 
+    //====================================================
+    //  Clock/Reset Generation 
+    //====================================================
     initial begin 
-        clk  = 0;
-        rstn = 0;
-        enb  = 0;
+        clk    = 0;
+        rstn   = 0;
+        enb_i  = 0;
+        size_i = 0;
     end
 
     always #(SYS_CLOCK/2) clk = ~clk;
@@ -71,7 +86,7 @@ module tb_memory_ctrl;
     end
 
     // initial begin
-    //     $monitor("t=%0t clk=%b rstn=%b enb=%b rdata_o=%h", $time, clk, rstn, enb, rdata_o);
+    //     $monitor("t=%0t clk=%b rstn=%b enb_i=%b rdata_o=%h", $time, clk, rstn, enb_i, rdata_o);
     // end
 
 endmodule

@@ -10,19 +10,20 @@ module memory_ctrl #(
     parameter int  ADDR_W      = 9,
     parameter int  DATA_W      = 32,
     parameter int  DEPTH       = 512,
-    parameter time SYS_CLOCK   = 1ns,
-    parameter time MEM_LATENCY = 10ns,
+    parameter time SYS_CLOCK   = 2ns,
+    parameter time MEM_LATENCY = 20ns,
     parameter time V_TIME      = 2ns
 )(
     input  logic              clk,
     input  logic              rstn,
-    input  logic              enb,
-    output  logic             valid_o,
+    input  logic              enb_i,
+    input  logic [3:0]        size_i,
+    output logic              valid_o,
     output logic [DATA_W-1:0] rdata_o
 );
 
     localparam int BANK = int'( MEM_LATENCY / SYS_CLOCK );
-    // initial $display("BANK = %0d", DUT.BANK);
+    initial $display("\nBANK = %0d", DUT.BANK);
 
     //==========================================================
     //  Internos
@@ -30,36 +31,43 @@ module memory_ctrl #(
     typedef enum logic [1:0] {IDLE_REQ, SEND_REQ, WAIT_REQ} state_req;
     typedef enum logic [1:0] {IDLE_RSP, GET_RSP,  WAIT_RSP} state_rsp;
 
-    state_req          CS_REQ, NS_REQ; 
-    state_rsp          CS_RSP, NS_RSP; 
-    logic              first_req;
-    logic              enb_r;
+    state_req  CS_REQ, NS_REQ; 
+    state_rsp  CS_RSP, NS_RSP; 
+    logic      next_is_send;
+    logic      curr_is_idle;
+    logic      curr_is_wait;
+
     logic [BANK-1:0]   req;
     logic [BANK-1:0]   we;
     logic [BANK-1:0]   valid;
     logic [BANK-1:0]   busy;
-    logic [ADDR_W-1:0] addr  [BANK];
+    
+    // logic [ADDR_W-1:0] addr  [BANK];
+    logic [ADDR_W-1:0] addr;
     logic [DATA_W-1:0] wdata [BANK];
     logic [DATA_W-1:0] rdata [BANK];
 
     //==========================================================
-    //  Address Generator
+    //  Write Data Assignment
     //==========================================================
     generate
     for (genvar l = 0; l < BANK; l++) begin
-        always_ff @(posedge clk or negedge rstn) begin
-            if (!rstn) begin
-                addr[l]  <= '0;
-                wdata[l] <= '0;
-            end else begin
-                addr[l]  <= ADDR_W'(l);
-                wdata[l] <= '0;
-            end
+        always_ff @(posedge clk or negedge rstn) begin : wdata_gen
+            if (!rstn)           wdata[l] <= '0;
+            else if(req[size_i]) wdata[l] <= '0;
         end
     end
     endgenerate
 
     assign we = '0;  // só leitura por enquanto
+
+    //==========================================================
+    //  Address Generator
+    //==========================================================
+    always_ff @(posedge clk or negedge rstn) begin : addr_gen
+        if (!rstn)           addr <= '0;
+        else if(req[size_i]) addr <= addr + 1;
+    end
 
     //==========================================================
     //  Maquina de estados para requisicao (req) 
@@ -71,12 +79,16 @@ module memory_ctrl #(
 
     always_comb begin
         case (CS_REQ)
-            IDLE_REQ: NS_REQ = (enb) ? SEND_REQ : IDLE_REQ;
-            SEND_REQ: NS_REQ = (req[BANK-1]) ? WAIT_REQ : SEND_REQ;
-            WAIT_REQ: NS_REQ = (valid[0])    ? SEND_REQ : WAIT_REQ;
+            IDLE_REQ: NS_REQ = (enb_i) ? SEND_REQ : IDLE_REQ;
+            SEND_REQ: NS_REQ = (req[size_i]) ? WAIT_REQ : SEND_REQ;
+            WAIT_REQ: NS_REQ = (valid[0])  ? SEND_REQ : WAIT_REQ;
             default:  NS_REQ = IDLE_REQ;
         endcase
     end
+
+    always_comb next_is_send = (NS_REQ==SEND_REQ);
+    always_comb curr_is_wait = (CS_REQ==WAIT_REQ);
+    always_comb curr_is_idle = (CS_REQ==IDLE_REQ);
 
     //==========================================================
     //  Maquina de estados para resposta (rsp) 
@@ -88,9 +100,9 @@ module memory_ctrl #(
 
     always_comb begin
         case (CS_RSP)
-            IDLE_RSP: NS_RSP = (enb) ? WAIT_RSP : IDLE_RSP;
-            WAIT_RSP: NS_RSP = (req[BANK-1])   ? GET_RSP : WAIT_RSP;
-            GET_RSP:  NS_RSP = (valid[BANK-1]) ? WAIT_RSP : GET_RSP;
+            IDLE_RSP: NS_RSP = (enb_i) ? WAIT_RSP : IDLE_RSP;
+            WAIT_RSP: NS_RSP = (req[size_i])   ? GET_RSP : WAIT_RSP;
+            GET_RSP:  NS_RSP = (valid[size_i]) ? WAIT_RSP : GET_RSP;
             default:  NS_RSP = IDLE_RSP;
         endcase
     end  
@@ -113,7 +125,7 @@ module memory_ctrl #(
         if (!rstn) 
             req[0] <= 0;
         else begin 
-            if ((enb && CS_REQ==IDLE_REQ) || (NS_REQ==SEND_REQ && CS_REQ==WAIT_REQ))
+            if ((enb_i && curr_is_idle) || (next_is_send && curr_is_wait))
                 req[0] <= 1;
             else
                 req[0] <= 0;
@@ -135,7 +147,7 @@ module memory_ctrl #(
             .clk      ( clk         ),
             .req      ( req[j]      ),
             .we       ( we[j]       ),    
-            .addr     ( addr[j]     ),
+            .addr     ( addr        ),
             .wdata    ( wdata[j]    ),
             .rdata    ( rdata[j]    ),
             .valid    ( valid[j]    ),
