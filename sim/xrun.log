@@ -1,0 +1,58 @@
+xrun(64): 24.09-s001: (c) Copyright 1995-2024 Cadence Design Systems, Inc.
+TOOL:	xrun(64)	24.09-s001: Started on Oct 22, 2026 at 14:44:37 -03
+xrun
+	-64bit
+	-sv
+	-access +rwc
+	-timescale 1ns/1ns
+	-f run_burst.f
+		../rtl/mem_ctrl.sv
+		../rtl/mem_model.sv
+		../tb/tb_mem_ctrl.sv
+Recompiling... reason: file '../rtl/mem_model.sv' is newer than expected.
+	expected: Thu Oct 22 13:51:13 2026
+	actual:   Thu Oct 22 14:37:45 2026
+file: ../rtl/mem_model.sv
+	module worklib.memory_model:sv
+		errors: 0, warnings: 0
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		tb_memory_ctrl
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.memory_model:sv <0x50b2751e>
+			streams:   4, words:  2987
+	Building instance specific data structures.
+	Loading native compiled code:     .................... Done
+	Design hierarchy summary:
+		                 Instances  Unique
+		Modules:                 7       3
+		Registers:              57      29
+		Scalar wires:           35       -
+		Vectored wires:         24       -
+		Always blocks:          23      15
+		Initial blocks:          8       4
+		Parallel blocks:         5       1
+		Cont. assignments:       1       1
+		Pseudo assignments:     41       -
+		Process Clocks:          8       1
+		Simulation timescale:  1ps
+	Writing initial simulation snapshot: worklib.tb_memory_ctrl:sv
+Loading snapshot worklib.tb_memory_ctrl:sv .................... Done
+xcelium> source /usr/local/cds/XCELIUM2409/tools/xcelium/files/xmsimrc
+xcelium> run
+
+
+===========================================================
+          ___             _     _____       _              
+         | _ )_  _ _ _ __| |_  |_   _|__ __| |_            
+         | _ \ || | '_(_-<  _|   | |/ -_|_-<  _|          
+         |___/\_,_|_| /__/\__|   |_|\___/__/\__|       
+===========================================================
+
+
+Simulation complete via $finish(1) at time 1 US + 0
+../tb/tb_mem_ctrl.sv:85         #(TIME_OUT) $finish(1);
+xcelium> exit
+TOOL:	xrun(64)	24.09-s001: Exiting on Oct 22, 2026 at 14:44:39 -03  (total: 00:00:02)
