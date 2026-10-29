@@ -10,6 +10,7 @@ module memory_ctrl #(
     parameter int  ADDR_W      = 9,
     parameter int  DATA_W      = 32,
     parameter int  DEPTH       = 512,
+    parameter int  MAX_SIZE    = 5,
     parameter time SYS_CLOCK   = 2ns,
     parameter time MEM_LATENCY = 20ns,
     parameter time V_TIME      = 2ns
@@ -22,36 +23,27 @@ module memory_ctrl #(
     output logic [DATA_W-1:0] rdata_o
 );
 
-    localparam int BANK = int'( MEM_LATENCY / SYS_CLOCK );
-    // initial $display("\nBANK = %0d", DUT.BANK);
-
     //==========================================================
     //  Internos
     //==========================================================
-    typedef enum logic [1:0] {IDLE_REQ, SEND_REQ, WAIT_REQ} state_req;
-    typedef enum logic [1:0] {IDLE_RSP, GET_RSP,  WAIT_RSP} state_rsp;
+    logic  next_is_send;
+    logic  curr_is_idle;
+    logic  curr_is_wait;
 
-    state_req  CS_REQ, NS_REQ; 
-    state_rsp  CS_RSP, NS_RSP; 
-    logic      next_is_send;
-    logic      curr_is_idle;
-    logic      curr_is_wait;
-
-    logic [BANK-1:0]   req;
-    logic [BANK-1:0]   we;
-    logic [BANK-1:0]   valid;
-    logic [BANK-1:0]   busy;
+    logic [MAX_SIZE-1:0]   req;
+    logic [MAX_SIZE-1:0]   we;
+    logic [MAX_SIZE-1:0]   valid;
+    logic [MAX_SIZE-1:0]   busy;
     
-    // logic [ADDR_W-1:0] addr  [BANK];
     logic [ADDR_W-1:0] addr;
-    logic [DATA_W-1:0] wdata [BANK];
-    logic [DATA_W-1:0] rdata [BANK];
+    logic [DATA_W-1:0] wdata [MAX_SIZE];
+    logic [DATA_W-1:0] rdata [MAX_SIZE];
 
     //==========================================================
     //  Write Data Assignment
     //==========================================================
     generate
-    for (genvar l = 0; l < BANK; l++) begin
+    for (genvar l = 0; l < MAX_SIZE; l++) begin
         always_ff @(posedge clk or negedge rstn) begin : wdata_gen
             if (!rstn)           wdata[l] <= '0;
             else if(req[size_i]) wdata[l] <= '0;
@@ -72,6 +64,14 @@ module memory_ctrl #(
     //==========================================================
     //  Maquina de estados para requisicao (req) 
     //==========================================================
+    typedef enum logic [1:0] {
+        IDLE_REQ, 
+        SEND_REQ, 
+        WAIT_REQ
+    } state_req;
+
+    state_req  CS_REQ, NS_REQ; 
+
     always_ff @(posedge clk or negedge rstn) begin
         if (!rstn) CS_REQ <= IDLE_REQ;
         else       CS_REQ <= NS_REQ;
@@ -93,6 +93,19 @@ module memory_ctrl #(
     //==========================================================
     //  Maquina de estados para resposta (rsp) 
     //==========================================================
+    // Ajeitar depois para valid[i] && size > SIZE
+    typedef enum logic [2:0] {
+        IDLE_RSP, 
+        GET_RSP_0,
+        GET_RSP_1,
+        GET_RSP_2,
+        GET_RSP_3,
+        GET_RSP_4,  
+        WAIT_RSP
+    } state_rsp;
+
+    state_rsp  CS_RSP, NS_RSP; 
+    
     always_ff @(posedge clk or negedge rstn) begin
         if (!rstn) CS_RSP <= IDLE_RSP;
         else       CS_RSP <= NS_RSP;
@@ -100,10 +113,14 @@ module memory_ctrl #(
 
     always_comb begin
         case (CS_RSP)
-            IDLE_RSP: NS_RSP = (enb_i) ? WAIT_RSP : IDLE_RSP;
-            WAIT_RSP: NS_RSP = (req[size_i])   ? GET_RSP : WAIT_RSP;
-            GET_RSP:  NS_RSP = (valid[size_i]) ? WAIT_RSP : GET_RSP;
-            default:  NS_RSP = IDLE_RSP;
+            IDLE_RSP:  NS_RSP = (enb_i)       ? WAIT_RSP  : IDLE_RSP;
+            WAIT_RSP:  NS_RSP = (req[size_i]) ? GET_RSP_0 : WAIT_RSP;
+            GET_RSP_0: NS_RSP = (valid[0])    ? GET_RSP_1 : GET_RSP_0;
+            GET_RSP_1: NS_RSP = (valid[1])    ? GET_RSP_2 : GET_RSP_1;
+            GET_RSP_2: NS_RSP = (valid[2])    ? GET_RSP_3 : GET_RSP_1;
+            GET_RSP_3: NS_RSP = (valid[3])    ? GET_RSP_4 : GET_RSP_1;
+            GET_RSP_4: NS_RSP = (valid[4])    ? WAIT_RSP  : GET_RSP_4;
+            default:   NS_RSP = IDLE_RSP;
         endcase
     end  
 
@@ -112,12 +129,12 @@ module memory_ctrl #(
     //===================================================
     always_ff @(posedge clk or negedge rstn) begin
         if (!rstn) 
-            req[BANK-1:1] <= '0;
+            req[MAX_SIZE-1:1] <= '0;
         else begin 
             if (NS_REQ==SEND_REQ) 
-                req[BANK-1:1] <= {req[BANK-2:1], req[0]};
+                req[MAX_SIZE-1:1] <= {req[MAX_SIZE-2:1], req[0]};
             else
-                req[BANK-1:1] <= '0;
+                req[MAX_SIZE-1:1] <= '0;
         end
     end
 
@@ -133,10 +150,10 @@ module memory_ctrl #(
     end   
 
     //===================================================
-    //  Memory Bank
+    //  Memory MAX_SIZE
     //===================================================
     generate
-    for (genvar j=0; j<BANK; j++) begin : mem_gen
+    for (genvar j=0; j<MAX_SIZE; j++) begin : mem_gen
         memory_model #(
             .ADDR_W   ( ADDR_W      ),
             .DATA_W   ( DATA_W      ),
@@ -160,18 +177,13 @@ module memory_ctrl #(
     //  Valid Read Data 
     //===================================================
     always_comb begin
-        case (valid)
-            5'b00001: rdata_o = rdata[0];
-            5'b00010: rdata_o = rdata[1];
-            5'b00100: rdata_o = rdata[2];
-            5'b01000: rdata_o = rdata[3];
-            5'b10000: rdata_o = rdata[4];
-            // 10'b0000100000: rdata_o = rdata[5];
-            // 10'b0001000000: rdata_o = rdata[6];
-            // 10'b0010000000: rdata_o = rdata[7];
-            // 10'b0100000000: rdata_o = rdata[8];
-            // 10'b1000000000: rdata_o = rdata[9];
-            default:        rdata_o = '1;
+        case (CS_RSP)
+            GET_RSP_0: rdata_o = rdata[0];
+            GET_RSP_1: rdata_o = rdata[1];
+            GET_RSP_2: rdata_o = rdata[2];
+            GET_RSP_3: rdata_o = rdata[3];
+            GET_RSP_4: rdata_o = rdata[4];
+            default:   rdata_o = '1;
         endcase
     end
 

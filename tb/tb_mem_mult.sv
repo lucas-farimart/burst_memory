@@ -29,6 +29,10 @@ module tb_memory_mult;
     logic               mult_vld_i;
     logic               mult_vld_o;
     logic signed [15:0] mult_o;
+    logic signed [15:0] mult_tb;
+
+    logic signed [DATA_W-1:0]  fifo_rdata_a [2];
+    logic signed [DATA_W-1:0]  fifo_rdata_b [2];
 
     //====================================================
     //                  DUT instances
@@ -105,19 +109,47 @@ module tb_memory_mult;
     end
 
     //====================================================
-    //  Clock/Reset Generation 
+    //  Clock/Reset Generation & Initializations
     //====================================================
     initial begin 
         clk  = 0;
         rstn = 0;
         enb_a = 0; size_a = SIZE_A-1;
         enb_b = 0; size_b = SIZE_B-1;
+        for (int i = 0; i<2; i++) begin
+            fifo_rdata_a[i] = 'd0;
+            fifo_rdata_b[i] = 'd0;
+        end
     end
 
     always #(SYS_CLOCK/2) clk = ~clk;
 
     initial begin
         #(TIME_OUT) $finish(1);
+    end
+
+    initial begin
+        forever begin
+            @(posedge clk)
+            if(mult_vld_i) begin
+                fifo_rdata_a[1] = fifo_rdata_a[0];
+                fifo_rdata_b[1] = fifo_rdata_b[0];
+                fifo_rdata_a[0] = rdata_a;
+                fifo_rdata_b[0] = rdata_b;
+            end
+        end
+    end
+
+    initial begin
+        forever begin
+            @(posedge mult_vld_o)
+            // if(mult_vld_o) begin
+                mult_tb = fifo_rdata_a[1] * fifo_rdata_b[1];
+                if (mult_o != mult_tb) 
+                    $display("[%0t] FAIL | data_i = %0d | mult_o = %0d | mult_tb = %0d", 
+                    $time, rdata_a, mult_o, mult_tb); 
+            // end
+        end
     end
 
     // initial begin

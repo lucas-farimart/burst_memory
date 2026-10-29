@@ -12,6 +12,9 @@ module tb_memory_ctrl;
     parameter int  DATA_W = 32;
     parameter int  DEPTH  = 512;
 
+    parameter int  MAX_SIZE  = 5;
+    parameter int  TEST_SIZE = 5;
+
     parameter time SYS_CLOCK   = 2ns;
     parameter time MEM_LATENCY = 10ns;
     parameter time V_TIME      = 2ns;
@@ -31,6 +34,7 @@ module tb_memory_ctrl;
         .ADDR_W      ( ADDR_W      ),
         .DATA_W      ( DATA_W      ),
         .DEPTH       ( DEPTH       ),
+        .MAX_SIZE    ( MAX_SIZE    ),
         .SYS_CLOCK   ( SYS_CLOCK   ),
         .MEM_LATENCY ( MEM_LATENCY ),
         .V_TIME      ( V_TIME      )
@@ -62,7 +66,10 @@ module tb_memory_ctrl;
 
         repeat(5) @(negedge clk); 
         enb_i  = 1;
-        size_i = 2; // <---- mudar aqui pra ver
+        if ( TEST_SIZE >= 0 || TEST_SIZE < 5 )
+            size_i = TEST_SIZE-1; 
+        else
+            $fatal(0,"Tamanho nao suportado. Experimente SIZE = {0:4}");
 
         repeat(1) @(negedge clk); 
         enb_i = 0;
