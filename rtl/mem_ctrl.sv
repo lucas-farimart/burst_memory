@@ -10,7 +10,7 @@ module memory_ctrl #(
     parameter int  ADDR_W      = 9,
     parameter int  DATA_W      = 32,
     parameter int  DEPTH       = 512,
-    parameter int  MAX_SIZE    = 5,
+    parameter int  MAX_SIZE    = 4,
     parameter time SYS_CLOCK   = 2ns,
     parameter time MEM_LATENCY = 20ns,
     parameter time V_TIME      = 2ns
@@ -100,7 +100,7 @@ module memory_ctrl #(
         GET_RSP_1,
         GET_RSP_2,
         GET_RSP_3,
-        GET_RSP_4,  
+        // GET_RSP_4,  
         WAIT_RSP
     } state_rsp;
 
@@ -117,9 +117,10 @@ module memory_ctrl #(
             WAIT_RSP:  NS_RSP = (req[size_i]) ? GET_RSP_0 : WAIT_RSP;
             GET_RSP_0: NS_RSP = (valid[0])    ? GET_RSP_1 : GET_RSP_0;
             GET_RSP_1: NS_RSP = (valid[1])    ? GET_RSP_2 : GET_RSP_1;
-            GET_RSP_2: NS_RSP = (valid[2])    ? GET_RSP_3 : GET_RSP_1;
-            GET_RSP_3: NS_RSP = (valid[3])    ? GET_RSP_4 : GET_RSP_1;
-            GET_RSP_4: NS_RSP = (valid[4])    ? WAIT_RSP  : GET_RSP_4;
+            GET_RSP_2: NS_RSP = (valid[2])    ? GET_RSP_3 : GET_RSP_2;
+            GET_RSP_3: NS_RSP = (valid[3])    ? WAIT_RSP  : GET_RSP_3;
+            // GET_RSP_3: NS_RSP = (valid[3])    ? GET_RSP_4 : GET_RSP_1;
+            // GET_RSP_4: NS_RSP = (valid[4])    ? WAIT_RSP  : GET_RSP_4;
             default:   NS_RSP = IDLE_RSP;
         endcase
     end  
@@ -182,7 +183,7 @@ module memory_ctrl #(
             GET_RSP_1: rdata_o = rdata[1];
             GET_RSP_2: rdata_o = rdata[2];
             GET_RSP_3: rdata_o = rdata[3];
-            GET_RSP_4: rdata_o = rdata[4];
+            // GET_RSP_4: rdata_o = rdata[4];
             default:   rdata_o = '1;
         endcase
     end

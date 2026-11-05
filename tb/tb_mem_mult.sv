@@ -15,7 +15,7 @@ module tb_memory_mult;
     parameter int  DEPTH  = 512;
 
     parameter time SYS_CLOCK   = 2ns;
-    parameter time MEM_LATENCY = 10ns;
+    parameter time MEM_LATENCY = 8ns;
     parameter time V_TIME      = 2ns;
     parameter time TIME_OUT    = 1us;
 
@@ -41,6 +41,7 @@ module tb_memory_mult;
         .ADDR_W      ( ADDR_W      ),
         .DATA_W      ( DATA_W      ),
         .DEPTH       ( DEPTH       ),
+        .MAX_SIZE    ( SIZE_A      ),
         .SYS_CLOCK   ( SYS_CLOCK   ),
         .MEM_LATENCY ( MEM_LATENCY ),
         .V_TIME      ( V_TIME      )
@@ -57,6 +58,7 @@ module tb_memory_mult;
         .ADDR_W      ( ADDR_W      ),
         .DATA_W      ( DATA_W      ),
         .DEPTH       ( DEPTH       ),
+        .MAX_SIZE    ( SIZE_B      ),
         .SYS_CLOCK   ( SYS_CLOCK   ),
         .MEM_LATENCY ( MEM_LATENCY ),
         .V_TIME      ( V_TIME      )
@@ -143,13 +145,18 @@ module tb_memory_mult;
     initial begin
         forever begin
             @(posedge mult_vld_o)
-            // if(mult_vld_o) begin
-                mult_tb = fifo_rdata_a[1] * fifo_rdata_b[1];
-                if (mult_o != mult_tb) 
-                    $display("[%0t] FAIL | data_i = %0d | mult_o = %0d | mult_tb = %0d", 
-                    $time, rdata_a, mult_o, mult_tb); 
-            // end
+            mult_tb = fifo_rdata_a[1] * fifo_rdata_b[1];
+            if (mult_o != mult_tb) 
+                $display("[%0t] FAIL | data_i = %0d | mult_o = %0d | mult_tb = %0d", 
+                $time, rdata_a, mult_o, mult_tb); 
         end
+    end
+
+    //==================================================== 
+    //  Back-annotation
+    //====================================================
+    initial begin
+        $sdf_annotate("burstMult_synth.sdf", tb_memory_mult);
     end
 
     // initial begin

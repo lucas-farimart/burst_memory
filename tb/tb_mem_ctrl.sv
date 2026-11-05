@@ -12,11 +12,11 @@ module tb_memory_ctrl;
     parameter int  DATA_W = 32;
     parameter int  DEPTH  = 512;
 
-    parameter int  MAX_SIZE  = 5;
-    parameter int  TEST_SIZE = 5;
+    parameter int  MAX_SIZE  = 4; 
+    parameter int  TEST_SIZE = 4;
 
     parameter time SYS_CLOCK   = 2ns;
-    parameter time MEM_LATENCY = 10ns;
+    parameter time MEM_LATENCY = 8ns;
     parameter time V_TIME      = 2ns;
     parameter time TIME_OUT    = 1us;
 
@@ -66,7 +66,7 @@ module tb_memory_ctrl;
 
         repeat(5) @(negedge clk); 
         enb_i  = 1;
-        if ( TEST_SIZE >= 0 || TEST_SIZE < 5 )
+        if ( TEST_SIZE > 0 || TEST_SIZE <= MAX_SIZE )
             size_i = TEST_SIZE-1; 
         else
             $fatal(0,"Tamanho nao suportado. Experimente SIZE = {0:4}");
@@ -90,6 +90,10 @@ module tb_memory_ctrl;
 
     initial begin
         #(TIME_OUT) $finish(1);
+    end
+
+    initial begin
+        $sdf_annotate("mult_ctrl_synth.sdf", tb_memory_mult);
     end
 
     // initial begin

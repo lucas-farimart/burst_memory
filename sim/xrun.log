@@ -1,5 +1,5 @@
 xrun(64): 24.09-s001: (c) Copyright 1995-2024 Cadence Design Systems, Inc.
-TOOL:	xrun(64)	24.09-s001: Started on Oct 29, 2026 at 17:09:02 -03
+TOOL:	xrun(64)	24.09-s001: Started on Nov 05, 2026 at 11:25:46 -03
 xrun
 	-64bit
 	-sv
@@ -11,10 +11,12 @@ xrun
 		../rtl/mem_model.sv
 		../tb/tb_mem_mult.sv
 	-gui
-	-s
-Recompiling... reason: file '../tb/tb_mem_mult.sv' is newer than expected.
-	expected: Thu Oct 29 17:08:27 2026
-	actual:   Thu Oct 29 17:08:57 2026
+file: ../rtl/mem_ctrl.sv
+	module worklib.memory_ctrl:sv
+		errors: 0, warnings: 0
+file: ../rtl/mem_model.sv
+	module worklib.memory_model:sv
+		errors: 0, warnings: 0
 file: ../tb/tb_mem_mult.sv
 	module worklib.tb_memory_mult:sv
 		errors: 0, warnings: 0
@@ -24,8 +26,12 @@ file: ../tb/tb_mem_mult.sv
 		tb_memory_mult
 	Building instance overlay tables: .................... Done
 	Generating native compiled code:
-		worklib.tb_memory_mult:sv <0x1279a2d2>
+		worklib.memory_model:sv <0x09ddb7ea>
+			streams:   4, words:  3032
+		worklib.tb_memory_mult:sv <0x3ad34978>
 			streams:  22, words: 15672
+		worklib.memory_ctrl:sv <0x5727631c>
+			streams:  30, words: 12620
 	Building instance specific data structures.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
@@ -43,14 +49,15 @@ file: ../tb/tb_mem_mult.sv
 		Simulation timescale:  1ps
 	Writing initial simulation snapshot: worklib.tb_memory_mult:sv
 xmsim: *W,NOMTDGUI: Multi-Threaded Dumping is disabled for interactive debug mode.
-xcelium> 
-xcelium> source /usr/local/cds/XCELIUM2409/tools/xcelium/files/xmsimrc
-xcelium> 
+
 -------------------------------------
 Relinquished control to SimVision...
-# Restoring simulation environment...
-xcelium> input -quiet .reinvoke.sim
-xcelium> file delete .reinvoke.sim
+xcelium> 
+xcelium> source /usr/local/cds/XCELIUM2409/tools/xcelium/files/xmsimrc
+xcelium> database -open waves -into waves.shm -default
+Created default SHM database waves
+xcelium> probe -create -shm tb_memory_mult.clk tb_memory_mult.rstn tb_memory_mult.enb_a tb_memory_mult.valid_a tb_memory_mult.size_a tb_memory_mult.rdata_a tb_memory_mult.enb_b tb_memory_mult.valid_b tb_memory_mult.size_b tb_memory_mult.rdata_b tb_memory_mult.mult_vld_i tb_memory_mult.mult_vld_o tb_memory_mult.mult_o tb_memory_mult.mult_tb tb_memory_mult.fifo_rdata_a tb_memory_mult.fifo_rdata_b
+Created probe 1
 xcelium> run
 
 
@@ -63,9 +70,7 @@ xcelium> run
 
 
 Simulation complete via $finish(1) at time 1 US + 0
-../tb/tb_mem_mult.sv:128         #(TIME_OUT) $finish(1);
+../tb/tb_mem_mult.sv:130         #(TIME_OUT) $finish(1);
 xcelium> ^C
 xcelium> exit
-...Regained control from SimVision
--------------------------------------
-TOOL:	xrun(64)	24.09-s001: Exiting on Oct 29, 2026 at 17:27:55 -03  (total: 00:18:53)
+TOOL:	xrun(64)	24.09-s001: Exiting on Nov 05, 2026 at 11:26:30 -03  (total: 00:00:44)
